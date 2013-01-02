@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+BASEDIR=`dirname $0`/..
+
+$BASEDIR/bin/setup
+
+source $BASEDIR/ve/bin/activate
+cd $BASEDIR
+export PYTHONPATH=.
+
+exec nosetests -m "tests" $@

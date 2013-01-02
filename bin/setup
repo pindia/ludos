@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Script to create virtualenv if it does not exist, and pip-install from requirements.pip if
+# requirements have changed.
+
+set -e
+
+BASEDIR=`dirname $0`/..
+
+if [ ! -d "$BASEDIR/ve" ]; then
+    virtualenv -q $BASEDIR/ve --no-site-packages
+    echo "Virtualenv created."
+fi
+
+if [ ! -f "$BASEDIR/ve/updated" -o $BASEDIR/requirements.pip -nt $BASEDIR/ve/updated ]; then
+    $BASEDIR/ve/bin/pip install -r $BASEDIR/requirements.pip
+    touch $BASEDIR/ve/updated
+    echo "Requirements installed."
+fi
