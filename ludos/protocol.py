@@ -19,7 +19,7 @@ class StartConnectionCommand(Command):
     '''
     id = 0
     def __init__(self, version, game_id, player_id, player_data, signature):
-        pass
+        self.version = self.game_id = self.player_id = self.player_data = self.signature = None
 
 class PlayerConnectedCommand(Command):
     ''' Sent by the server to inform a player of the other players in the game.
@@ -28,12 +28,13 @@ class PlayerConnectedCommand(Command):
     '''
     id = 1
     def __init__(self, player_id, player_data):
-        pass
+        self.player_id = self.player_data = None
 
 class GameControlCommand(Command):
     ''' Sent by the server to control the flow of the game. Multiple players must agree on a game control
     action for the server to acknowledge it and forward it to the remaining players.
     @arg op: Integer ID of the game control operation to perform
+    @arg timestep: The timestep when the command will become effective
     @arg player_id: Integer ID of the player being affected by the operation (if applicable)
     '''
     id = 2
@@ -45,8 +46,8 @@ class GameControlCommand(Command):
     PLAYER_DEFEAT = 5
     PLAYER_QUIT = 6
     PLAYER_KICKED = 7
-    def __init__(self, op, player_id):
-        pass
+    def __init__(self, op, timestep, player_id):
+        self.op = self.timestep = self.player_id = None
 
 class PlayerActionCommand(Command):
     ''' Sent by a player and forwarded by the server, containing the player's actions for a given time step.
@@ -56,7 +57,7 @@ class PlayerActionCommand(Command):
     '''
     id = 3
     def __init__(self, player_id, timestep, actions):
-        pass
+        self.player_id = self.timestep = self.actions = None
 
 class ChatMessageCommand(Command):
     ''' Sent by a player and forwarded by the server, containing a chat message sent by a player.
@@ -66,7 +67,7 @@ class ChatMessageCommand(Command):
     '''
     id = 4
     def __init__(self, player_id, channel, message):
-        pass
+        self.player_id = self.channels = self.message = None
 
 
 
