@@ -1,7 +1,10 @@
+import collections
+
 class Game(object):
     def __init__(self, id):
         self.id = id
         self.players = {}
+
 
 class Player(object):
     def __init__(self, id, data, transport):

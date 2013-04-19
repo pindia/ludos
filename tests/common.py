@@ -12,6 +12,8 @@ class LudosTestCase(TestCase):
         c = LudosConnection(t)
         return c
 
+
+
     def clear_all_buffers(self):
         for connection in self.connections:
             connection.command_buffer = []

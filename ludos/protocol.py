@@ -1,10 +1,16 @@
 import inspect
 from collections import namedtuple
+import re
+
 
 def command_class_decorator(cls):
     ''' Decorator to transform command classes into named tuples for performance. The signature of the __init__ method
     is used to determine the field names. '''
-    return namedtuple(cls.__name__, inspect.getargspec(cls.__init__).args[1:])
+    new_cls = namedtuple(cls.__name__, inspect.getargspec(cls.__init__).args[1:])
+    for attr in dir(cls):
+        if re.match('^[A-Z_]+$', attr):
+            setattr(new_cls, attr, getattr(cls, attr))
+    return new_cls
 
 class Command(object):
     id = None
