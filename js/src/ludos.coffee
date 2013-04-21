@@ -1,7 +1,7 @@
 defaultOptions =
   minimumLatency: 150
   stepTime: 50
-  players: 2
+  players: 0
   protocol: 'ws/json'
   playerData: {}
 
@@ -15,20 +15,25 @@ class Game
     this.players = {}
     this.timestep = 0
     this.connection = new ludos.protocol.LudosConnection(this.options.server, this.options.protocol)
-    this.connection.bind 'connected', (gameId, playerId) =>
+    this.connection.bind 'connected', (gameId, gameData, playerId) =>
       this.gameId = gameId
+      $.extend(this.options, gameData)
       this.playerId = playerId
       this.players[playerId] = this.options.playerData
       this.trigger('connected')
       this._checkStartGame()
     this.connection.bind 'playerConnected', (playerId, playerData) =>
       this.players[playerId] = playerData
+      this.trigger('playersChanged')
       this._checkStartGame()
 
     this.connection.bind 'gameControl', (op, timestep, playerId) =>
       if op == gameControl.START_GAME
         this.gameStarted()
         this.trigger('gameStarted')
+      if op == gameControl.PLAYER_QUIT
+        delete this.players[playerId]
+        this.trigger('playersChanged')
 
   _checkStartGame: ->
     if this.options.players == this.numPlayers()
@@ -48,7 +53,7 @@ class Game
     this.engine.start()
 
   createGame: ->
-    this.connection.createGame(this.options.playerData)
+    this.connection.createGame(this.options, this.options.playerData)
 
   joinGame: (gameId) ->
     this.connection.joinGame(gameId, this.options.playerData)

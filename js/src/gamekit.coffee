@@ -93,6 +93,8 @@ class GameKitController
         'quit': =>
           this.game.quit()
           this.initializeGame()
+    this.game.bind 'playersChanged', =>
+     dialog.m.players = this.game.numPlayers()
     this.game.bind 'gameStarted', ->
       dialog.destroy()
     $$.document.append dialog

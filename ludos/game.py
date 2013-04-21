@@ -11,8 +11,9 @@ class Game(object):
     STATE_PAUSED = 2
     STATE_OVER = 3
 
-    def __init__(self, id, destroy_callback=lambda: None):
+    def __init__(self, id, data, destroy_callback=lambda: None):
         self.id = id
+        self.data = data
         self.state = Game.STATE_NEW
         self.players = {}
         self.game_control = collections.defaultdict(set)
@@ -62,11 +63,11 @@ class GameManager(object):
     def __init__(self):
         self.games = {}
 
-    def get_game(self, game_id):
+    def get_game(self, game_id, game_data):
         if game_id in self.games:
             return self.games[game_id]
         else:
-            game = Game(game_id, lambda: self.destroy_game(game_id))
+            game = Game(game_id, game_data, lambda: self.destroy_game(game_id))
             self.games[game_id] = game
             return game
 

@@ -8,9 +8,9 @@ class ConnectionTests(LudosTestCase):
 
     def test_player_join(self):
         c1 = self.make_connection()
-        c1.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', 0, {'name': 'Player 1'}, None))
+        c1.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', {}, 0, {'name': 'Player 1'}, None))
         c2 = self.make_connection()
-        c2.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', 1, {'name': 'Player 2'}, None))
+        c2.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', {}, 1, {'name': 'Player 2'}, None))
         self.assertCommandReceived(c1, PlayerConnectedCommand(1, {'name': 'Player 2'}))
         self.assertCommandReceived(c2, PlayerConnectedCommand(0, {'name': 'Player 1'}))
 
@@ -21,8 +21,8 @@ class ConnectionTests(LudosTestCase):
     def test_game_start(self):
         c1 = self.make_connection()
         c2 = self.make_connection()
-        c1.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', 0, {'name': 'Player 1'}, None))
-        c2.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', 1, {'name': 'Player 2'}, None))
+        c1.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', {}, 0, {'name': 'Player 1'}, None))
+        c2.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', {}, 1, {'name': 'Player 2'}, None))
         self.clear_all_buffers()
 
         gc = GameControlCommand(GameControlCommand.START_GAME, 0, None)
@@ -34,17 +34,18 @@ class ConnectionTests(LudosTestCase):
         self.assertCommandReceived(c2, gc) # Once acknowledged, command is broadcast
 
         c3 = self.make_connection()
-        c3.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', 2, {'name': 'Player 3'}, None))
+        c3.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME_AS_PLAYER, 'test', {}, 2, {'name': 'Player 3'}, None))
         self.assertFalse(c3.transport.open) # Once started, no new players can join
 
     def test_create_game(self):
         c1 = self.make_connection()
-        c1.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.CREATE_GAME, None, None, {'name': 'Player 1'}, None))
+        c1.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.CREATE_GAME, None, {'players': 2}, None, {'name': 'Player 1'}, None))
         c = c1.transport.receive_command()
         self.assertEquals(c.game_id, c1.game.id)
         self.assertEquals(c.player_id, 0)
         c2 = self.make_connection()
-        c2.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME, c1.game.id, None, {'name': 'Player 1'}, None))
+        c2.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.JOIN_GAME, c1.game.id, None, None, {'name': 'Player 1'}, None))
         c = c2.transport.receive_command(StartConnectionCommand)
         self.assertEquals(c.game_id, c1.game.id)
+        self.assertEquals(c.game_data, {'players': 2})
         self.assertEquals(c.player_id, 1)

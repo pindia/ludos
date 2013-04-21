@@ -16,7 +16,8 @@ class LudosConnection(object):
             if command.op == StartConnectionCommand.CREATE_GAME:
                 game_id = MANAGER.assign_game_id()
                 player_id = 0
-            self.game = MANAGER.get_game(game_id)
+            self.game = MANAGER.get_game(game_id, command.game_data)
+            game_data = self.game.data
             if command.op == StartConnectionCommand.JOIN_GAME:
                 player_id = self.game.assign_player_id()
             if self.game.state > Game.STATE_NEW:
@@ -30,7 +31,7 @@ class LudosConnection(object):
                 if player != self.player:
                     player.transport.send_command(PlayerConnectedCommand(player_id, command.player_data))
             if command.op == StartConnectionCommand.CREATE_GAME or StartConnectionCommand.JOIN_GAME:
-                self.transport.send_command(StartConnectionCommand(command.version, command.op, game_id, player_id, command.player_data, command.signature))
+                self.transport.send_command(StartConnectionCommand(command.version, command.op, game_id, game_data, player_id, command.player_data, command.signature))
         if isinstance(command, GameControlCommand):
             self.game.received_game_control(command, self.player)
         if isinstance(command, PlayerActionCommand) or isinstance(command, ChatMessageCommand) and self.game.state > Game.STATE_NEW:

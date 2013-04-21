@@ -69,7 +69,6 @@ mainLoop = ->
 
 c = new ludos.GameKitController
   server: window.location.hostname + ':8000'
-  players: NW_PLAYERS
 
 c.bind 'gameStarted', (game) ->
   console.log 'game started'
@@ -82,7 +81,6 @@ c.bind 'gameStarted', (game) ->
 
   keyboard = new ludos.KeyboardEventHelper(game, $(document), [37, 38, 39])
   keyboard.bind 'keyDown', (playerId, which) ->
-    console.log playerId, which
     player = players[playerId]
     if which == 39
       player.dx = 3
