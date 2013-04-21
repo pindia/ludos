@@ -63,6 +63,10 @@ class LudosConnection
         [PROTOCOL_VERSION, startConnection.OP_JOIN_GAME, gameId, null, playerData, null])
     this._connect()
 
+  close: ->
+    this.ws.onclose = null
+    this.ws.close()
+
 
 MicroEvent.mixin(LudosConnection)
 

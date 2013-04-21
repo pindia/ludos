@@ -8,6 +8,10 @@ class Timer
   start: ->
     this._setTimeout()
 
+  stop: ->
+    this.ready = false
+    clearTimeout this.timeout
+
   allowTicks: (ticks) ->
     this.maxTicks += ticks
     if this.ready
@@ -18,7 +22,7 @@ class Timer
     this.maxTicks = maxTicks
 
   _setTimeout: ->
-    setTimeout (=> this._tryTick()), this.interval
+    this.timeout = setTimeout (=> this._tryTick()), this.interval
 
   _tryTick: ->
     if this.ticks < this.maxTicks
@@ -51,6 +55,9 @@ class Engine
 
   start: ->
     this.timer.start()
+
+  stop: ->
+    this.timer.stop()
 
   receiveCommands: (player, timestep, commands) ->
     if timestep not of this.timestepIndex then this.timestepIndex[timestep] = {}

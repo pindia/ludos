@@ -19,6 +19,7 @@ class Game
       this.gameId = gameId
       this.playerId = playerId
       this.players[playerId] = this.options.playerData
+      this.trigger('connected')
       this._checkStartGame()
     this.connection.bind 'playerConnected', (playerId, playerData) =>
       this.players[playerId] = playerData
@@ -30,7 +31,7 @@ class Game
         this.trigger('gameStarted')
 
   _checkStartGame: ->
-    if this.options.players == Object.keys(this.players).length
+    if this.options.players == this.numPlayers()
       this.connection.sendGameControl(gameControl.START_GAME, this.timestep)
 
   gameStarted: ->
@@ -54,6 +55,16 @@ class Game
 
   sendAction: (action) ->
     this.engine.sendCommand(action)
+
+  quit: ->
+    this.connection.close()
+    if this.engine?
+      this.engine.stop()
+    this.trigger('quit')
+
+  numPlayers: ->
+    return Object.keys(this.players).length
+
 
 MicroEvent.mixin(Game)
 

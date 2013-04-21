@@ -1,2 +1,4 @@
 *.pyc
 ve
+*.js
+!js/lib/*.js
