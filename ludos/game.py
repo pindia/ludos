@@ -1,7 +1,9 @@
 import collections
 import itertools
+import logging
 from ludos.protocol import *
 
+log = logging.getLogger(__name__)
 
 class Game(object):
     STATE_NEW = 0
@@ -9,16 +11,23 @@ class Game(object):
     STATE_PAUSED = 2
     STATE_OVER = 3
 
-    def __init__(self, id):
+    def __init__(self, id, destroy_callback=lambda: None):
         self.id = id
         self.state = Game.STATE_NEW
         self.players = {}
         self.game_control = collections.defaultdict(set)
+        self.destroy_callback = destroy_callback
 
     def assign_player_id(self):
         for i in itertools.count():
             if i not in self.players:
                 return i
+
+    def remove_player(self, player_id):
+        del self.players[player_id]
+        if len(self.players) == 0:
+            self.destroy_callback()
+
 
     def received_game_control(self, command, player):
         s = self.game_control[command]
@@ -57,9 +66,13 @@ class GameManager(object):
         if game_id in self.games:
             return self.games[game_id]
         else:
-            game = Game(game_id)
+            game = Game(game_id, lambda: self.destroy_game(game_id))
             self.games[game_id] = game
             return game
+
+    def destroy_game(self, game_id):
+        log.info('Destroying game %s' % game_id)
+        del self.games[game_id]
 
     def assign_game_id(self):
         for i in itertools.count():

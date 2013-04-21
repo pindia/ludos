@@ -41,6 +41,6 @@ class LudosConnection(object):
     def on_disconnect(self, clean):
         if not hasattr(self, 'game'):
             return
-        del self.game.players[self.player.id]
+        self.game.remove_player(self.player.id)
         for player in self.game.players.values():
             player.transport.send_command(GameControlCommand(GameControlCommand.PLAYER_QUIT, 0, self.player.id))
