@@ -10,6 +10,7 @@ def command_class_decorator(cls):
     for attr in dir(cls):
         if re.match('^[A-Z_]+$', attr):
             setattr(new_cls, attr, getattr(cls, attr))
+            new_cls.id = cls.id
     return new_cls
 
 class Command(object):
