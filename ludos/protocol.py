@@ -24,8 +24,11 @@ class StartConnectionCommand(Command):
     @arg signature: String signature from a master game server validating the previous arguments
     '''
     id = 0
-    def __init__(self, version, game_id, player_id, player_data, signature):
-        self.version = self.game_id = self.player_id = self.player_data = self.signature = None
+    CREATE_GAME = 0
+    JOIN_GAME = 1
+    JOIN_GAME_AS_PLAYER = 2
+    def __init__(self, version, op, game_id, player_id, player_data, signature):
+        self.version = self.op = self.game_id = self.player_id = self.player_data = self.signature = None
 
 class PlayerConnectedCommand(Command):
     ''' Sent by the server to inform a player of the other players in the game.

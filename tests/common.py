@@ -38,6 +38,18 @@ class TestTransport(Transport):
     def client_disconnected(self, clean):
         self._on_disconnect(clean)
 
+    def receive_command(self, cls=None):
+        assert len(self.command_buffer)
+        if cls is None:
+            return self.command_buffer.pop(0)
+        else:
+            buf = [c for c in self.command_buffer if isinstance(c, cls)]
+            assert len(buf)
+            c = buf[0]
+            self.command_buffer.remove(c)
+            return c
+
+
     def send_command(self, command):
         self.command_buffer.append(command)
 

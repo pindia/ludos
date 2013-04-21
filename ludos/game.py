@@ -1,4 +1,5 @@
 import collections
+import itertools
 from ludos.protocol import *
 
 
@@ -13,6 +14,11 @@ class Game(object):
         self.state = Game.STATE_NEW
         self.players = {}
         self.game_control = collections.defaultdict(set)
+
+    def assign_player_id(self):
+        for i in itertools.count():
+            if i not in self.players:
+                return i
 
     def received_game_control(self, command, player):
         s = self.game_control[command]
@@ -54,6 +60,11 @@ class GameManager(object):
             game = Game(game_id)
             self.games[game_id] = game
             return game
+
+    def assign_game_id(self):
+        for i in itertools.count():
+            if str(i) not in self.games:
+                return str(i)
 
     def reset(self):
         self.games = {}

@@ -11,16 +11,26 @@ class LudosConnection(object):
 
     def on_command(self, command):
         if isinstance(command, StartConnectionCommand):
-            self.game = MANAGER.get_game(command.game_id)
+            game_id = command.game_id
+            player_id = command.player_id
+            if command.op == StartConnectionCommand.CREATE_GAME:
+                game_id = MANAGER.assign_game_id()
+                player_id = 0
+            self.game = MANAGER.get_game(game_id)
+            if command.op == StartConnectionCommand.JOIN_GAME:
+                player_id = self.game.assign_player_id()
             if self.game.state > Game.STATE_NEW:
                 self.transport.disconnect()
                 return
             for player in self.game.players.values():
                 self.transport.send_command(PlayerConnectedCommand(player.id, player.data))
-            self.player = Player(command.player_id, command.player_data, self.transport)
-            self.game.players[command.player_id] = self.player
+            self.player = Player(player_id, command.player_data, self.transport)
+            self.game.players[player_id] = self.player
             for player in self.game.players.values():
-                player.transport.send_command(PlayerConnectedCommand(command.player_id, command.player_data))
+                if player != self.player:
+                    player.transport.send_command(PlayerConnectedCommand(player_id, command.player_data))
+            if command.op == StartConnectionCommand.CREATE_GAME or StartConnectionCommand.JOIN_GAME:
+                self.transport.send_command(StartConnectionCommand(command.version, command.op, game_id, player_id, command.player_data, command.signature))
         if isinstance(command, GameControlCommand):
             self.game.received_game_control(command, self.player)
         if isinstance(command, PlayerActionCommand) or isinstance(command, ChatMessageCommand) and self.game.state > Game.STATE_NEW:
