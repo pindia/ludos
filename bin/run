@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
-# Script to run the TutorMe worker server.
-
+# Script to run the Ludos game server
 
 BASEDIR=`dirname $0`/..
 
@@ -11,4 +10,4 @@ source $BASEDIR/ve/bin/activate
 cd $BASEDIR
 export PYTHONPATH=.
 
-exec python $@
+exec python ludos/main.py
