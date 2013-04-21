@@ -1,6 +1,7 @@
 class Timer
   constructor: (interval) ->
-    this.ticksAllowed = 0
+    this.ticks = 0
+    this.maxTicks = 0
     this.ready = false
     this.interval = interval
 
@@ -8,22 +9,25 @@ class Timer
     this._setTimeout()
 
   allowTicks: (ticks) ->
-    this.ticksAllowed += ticks
+    this.maxTicks += ticks
     if this.ready
       this._tick()
       this.ready = false
+
+  setMaxTicks: (maxTicks) ->
+    this.maxTicks = maxTicks
 
   _setTimeout: ->
     setTimeout (=> this._tryTick()), this.interval
 
   _tryTick: ->
-    if this.ticksAllowed > 0
+    if this.ticks < this.maxTicks
       this._tick()
     else
       this.ready = true
 
   _tick: ->
-    this.ticksAllowed -= 1
+    this.ticks += 1
     this.trigger('tick')
     this._setTimeout()
 MicroEvent.mixin(Timer)
@@ -43,6 +47,7 @@ class Engine
     for timestep in [0...this.scheduleDelay]
       for player in [0...this.players]
         this.receiveCommands(player, timestep, [])
+    this.checkMaxTimestep()
 
   start: ->
     this.timer.start()
@@ -57,7 +62,7 @@ class Engine
     for player in [0...this.players]
       if player not of this.timestepIndex[this.timestep]
         return
-    this.timer.allowTicks(1)
+    this.timer.setMaxTicks(this.timestep + 1)
 
   sendCommand: (command) ->
     this.myCommands.push command
