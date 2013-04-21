@@ -36,7 +36,7 @@ class Engine
   constructor: (playerId, players, stepTime, scheduleDelay) ->
     this.players = players
     this.playerId = playerId
-    this.scheduleDelay = scheduleDelay
+    this.scheduleDelay = Math.max(1, scheduleDelay)
     this.timestep = 0
     this.maxTimestep = 0
     this.timestepIndex = {}
@@ -74,7 +74,6 @@ class Engine
     delete this.timestepIndex[this.timestep]
     this._sendCommands()
     this.timestep += 1
-    console.log this.timestep
     this.checkMaxTimestep()
 
   _sendCommands: ->
@@ -85,3 +84,4 @@ MicroEvent.mixin(Engine)
 
 window.ludos = window.ludos or {}
 window.ludos.Engine = Engine
+window.ludos.Timer = Timer

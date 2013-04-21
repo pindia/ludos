@@ -36,7 +36,7 @@ class Game
   gameStarted: ->
     this.engine = new ludos.Engine(
       this.playerId, this.options.players,
-      this.options.stepTime, parseInt(this.options.minimumLatency / this.options.stepTime)
+      this.options.stepTime, Math.max(1, this.options.minimumLatency / this.options.stepTime)
     )
     this.engine.bind 'advanceTimestep', => this.trigger('advanceTimestep')
     this.engine.bind 'playerCommands', (playerId, actions) => this.trigger('playerActions', playerId, actions)
@@ -51,6 +51,9 @@ class Game
 
   joinGame: (gameId) ->
     this.connection.joinGame(gameId, this.options.playerData)
+
+  sendAction: (action) ->
+    this.engine.sendCommand(action)
 
 MicroEvent.mixin(Game)
 
