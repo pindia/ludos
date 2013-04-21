@@ -1,6 +1,6 @@
 defaultOptions =
-  minimumLatency: 1000
-  stepTime: 500
+  minimumLatency: 150
+  stepTime: 50
   players: 2
   protocol: 'ws/json'
   playerData: {}

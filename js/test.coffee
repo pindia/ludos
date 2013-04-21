@@ -6,8 +6,8 @@ players = []
 maxX = 0
 
 COLORS = ['red', 'blue', 'green', 'black', 'orange', 'purple', 'gray']
-PLAYERS = 5
-NW_PLAYERS = 2
+PLAYERS = 2
+NW_PLAYERS = 1
 
 live = 0
 playerTemplate =
@@ -69,45 +69,35 @@ mainLoop = ->
 
 
 game = new ludos.Game
-  server: 'localhost:8000'
+  server: window.location.hostname + ':8000'
   players: NW_PLAYERS
-  stepTime: 50
-  minimumLatency: 150
 game.joinGame('test')
 game.bind 'gameStarted', ->
   console.log 'game started'
-
   updateTimer = new ludos.Timer(25)
   updateTimer.start()
   updateTimer.bind 'tick', ->
     update()
   game.bind 'advanceTimestep', ->
     updateTimer.allowTicks(2)
-  game.bind 'playerActions', (playerId, commands) ->
-    player = players[playerId]
-    for command in commands
-      if command == 'right'
-        player.dx = 3
-      if command == 'left'
-        player.dx = -3
-      if command == 'jump' and player.y == 0
-        player.dy = 10
-      if command == 'stopRight' and player.dx > 0
-        player.dx = 0
-      if command == 'stopLeft' and player.dx < 0
-        player.dx = 0
-  $(document).keydown (evt) ->
-    if evt.which == 39
-      game.sendAction('right')
-    if evt.which == 37
-      game.sendAction('left')
-    if evt.which == 38
-      game.sendAction('jump')
-  $(document).keyup (evt) ->
-    if evt.which == 39
-      game.sendAction('stopRight')
-    if evt.which == 37
-      game.sendAction('stopLeft')
+
+keyboard = new ludos.KeyboardEventHelper(game, $(document), [37, 38, 39])
+keyboard.bind 'keyDown', (playerId, which) ->
+  console.log playerId, which
+  player = players[playerId]
+  if which == 39
+    player.dx = 3
+  if which == 37
+    player.dx = -3
+  if which == 38 and player.y == 0
+    player.dy = 10
+keyboard.bind 'keyUp', (playerId, which) ->
+  player = players[playerId]
+  if which == 39 and player.dx > 0
+    player.dx = 0
+  if which == 37 and player.dx < 0
+    player.dx = 0
+
 
 $ ->
   mainLoop()
