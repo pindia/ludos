@@ -1,27 +1,28 @@
 from unittest import TestCase
-from ludos.connection import LudosConnection
+from ludos.connection import LudosConnection, MANAGER
 from ludos.transport import Transport
 
 
 class LudosTestCase(TestCase):
     def setUp(self):
         self.connections = []
+        MANAGER.reset()
 
     def make_connection(self):
         t = TestTransport()
         c = LudosConnection(t)
+        self.connections.append(c)
         return c
-
-
 
     def clear_all_buffers(self):
         for connection in self.connections:
-            connection.command_buffer = []
+            connection.transport.command_buffer = []
 
     def assertNoCommandsReceived(self, connection):
         self.assertFalse(connection.transport.command_buffer)
 
     def assertCommandReceived(self, connection, command):
+        self.assertTrue(connection.transport.open)
         self.assertIn(command, connection.transport.command_buffer)
         connection.transport.command_buffer.remove(command)
 

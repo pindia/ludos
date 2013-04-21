@@ -25,4 +25,16 @@ class ConnectionTests(LudosTestCase):
         c2.transport.client_command(StartConnectionCommand(1, 'test', 1, {'name': 'Player 2'}, None))
         self.clear_all_buffers()
 
+        gc = GameControlCommand(GameControlCommand.START_GAME, 0, None)
+        c1.transport.client_command(gc)
+        self.assertNoCommandsReceived(c1)
+        self.assertNoCommandsReceived(c2) # First game control command has no effect
+        c2.transport.client_command(gc)
+        self.assertCommandReceived(c1, gc)
+        self.assertCommandReceived(c2, gc) # Once acknowledged, command is broadcast
+
+        c3 = self.make_connection()
+        c3.transport.client_command(StartConnectionCommand(1, 'test', 2, {'name': 'Player 3'}, None))
+        self.assertFalse(c3.transport.open) # Once started, no new players can join
+
 
