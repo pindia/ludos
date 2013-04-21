@@ -1,0 +1,22 @@
+.ui-dialog {
+    position: absolute;
+    left: 50%; top: 100px;
+    width: 600px;
+    margin-left: -300px;
+    border:1px solid rgb(102, 102, 102);
+}
+
+.ui-dialog-titlebar {
+    width:100%;
+    padding:10px 0;
+    background-color: gray;
+    box-shadow: 0 -1px 0 rgba(0,0,0,.3) inset;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    color:white;
+}
+
+.ui-dialog-content {
+    padding: 20px;
+}

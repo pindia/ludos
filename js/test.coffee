@@ -67,12 +67,11 @@ mainLoop = ->
     ctx.fillRect(player.x, canvas.height - player.y - 20, 20, 20)
   requestAnimationFrame(mainLoop)
 
-
-game = new ludos.Game
+c = new ludos.GameKitController
   server: window.location.hostname + ':8000'
   players: NW_PLAYERS
-game.joinGame('test')
-game.bind 'gameStarted', ->
+
+c.bind 'gameStarted', (game) ->
   console.log 'game started'
   updateTimer = new ludos.Timer(25)
   updateTimer.start()
@@ -81,25 +80,57 @@ game.bind 'gameStarted', ->
   game.bind 'advanceTimestep', ->
     updateTimer.allowTicks(2)
 
-keyboard = new ludos.KeyboardEventHelper(game, $(document), [37, 38, 39])
-keyboard.bind 'keyDown', (playerId, which) ->
-  console.log playerId, which
-  player = players[playerId]
-  if which == 39
-    player.dx = 3
-  if which == 37
-    player.dx = -3
-  if which == 38 and player.y == 0
-    player.dy = 10
-keyboard.bind 'keyUp', (playerId, which) ->
-  player = players[playerId]
-  if which == 39 and player.dx > 0
-    player.dx = 0
-  if which == 37 and player.dx < 0
-    player.dx = 0
-
-
-$ ->
+  keyboard = new ludos.KeyboardEventHelper(game, $(document), [37, 38, 39])
+  keyboard.bind 'keyDown', (playerId, which) ->
+    console.log playerId, which
+    player = players[playerId]
+    if which == 39
+      player.dx = 3
+    if which == 37
+      player.dx = -3
+    if which == 38 and player.y == 0
+      player.dy = 10
+  keyboard.bind 'keyUp', (playerId, which) ->
+    player = players[playerId]
+    if which == 39 and player.dx > 0
+      player.dx = 0
+    if which == 37 and player.dx < 0
+      player.dx = 0
   mainLoop()
+
+
+#game = new ludos.Game
+#  server: window.location.hostname + ':8000'
+#  players: NW_PLAYERS
+#game.joinGame('test')
+#game.bind 'gameStarted', ->
+#  console.log 'game started'
+#  updateTimer = new ludos.Timer(25)
+#  updateTimer.start()
+#  updateTimer.bind 'tick', ->
+#    update()
+#  game.bind 'advanceTimestep', ->
+#    updateTimer.allowTicks(2)
+#
+#keyboard = new ludos.KeyboardEventHelper(game, $(document), [37, 38, 39])
+#keyboard.bind 'keyDown', (playerId, which) ->
+#  console.log playerId, which
+#  player = players[playerId]
+#  if which == 39
+#    player.dx = 3
+#  if which == 37
+#    player.dx = -3
+#  if which == 38 and player.y == 0
+#    player.dy = 10
+#keyboard.bind 'keyUp', (playerId, which) ->
+#  player = players[playerId]
+#  if which == 39 and player.dx > 0
+#    player.dx = 0
+#  if which == 37 and player.dx < 0
+#    player.dx = 0
+
+
+#$ ->
+#  mainLoop()
 
 
