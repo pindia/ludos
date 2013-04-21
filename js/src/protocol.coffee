@@ -1,14 +1,17 @@
 command =
-  START_CONNECTION: 0
-  PLAYER_CONNECTED: 1
-  GAME_CONTROL: 2
-  PLAYER_ACTION: 3
-  CHAT_MESSAGE: 4
+  START_CONNECTION: 0 # version, op, gameId, playerId, playerData, signature
+  PLAYER_CONNECTED: 1 # playerId, playerData
+  GAME_CONTROL: 2 # op, timestep, playerId
+  PLAYER_ACTION: 3 # playerId, timestep, actions
+  CHAT_MESSAGE: 4 # playerId, channel, message
 
 startConnection =
   OP_CREATE_GAME: 0
   OP_JOIN_GAME: 1
   OP_JOIN_GAME_AS_PLAYER: 2
+
+gameControl =
+  START_GAME: 0
 
 PROTOCOL_VERSION = 1
 
@@ -33,7 +36,20 @@ class LudosConnection
     this.ws.send(JSON.stringify([commandId].concat(args)))
 
   _commandReceived: (commandId, args) ->
+    if commandId == command.START_CONNECTION
+      this.trigger('connected', args[2], args[3])
+    if commandId == command.PLAYER_CONNECTED
+      this.trigger('playerConnected', args[0], args[1])
+    if commandId == command.PLAYER_ACTION
+      this.trigger('playerAction', args[0], args[1], args[2])
+    if commandId == command.GAME_CONTROL
+      this.trigger('gameControl', args[0], args[1], args[2])
 
+  sendGameControl: (op, timestep, playerId=null) ->
+    this._sendCommand(command.GAME_CONTROL, [op, timestep, playerId])
+
+  sendActions: (playerId, timestep, actions) ->
+    this._sendCommand(command.PLAYER_ACTION, [playerId, timestep, actions])
 
   createGame: (playerData) ->
     this.bind 'socketOpen', =>
@@ -53,3 +69,4 @@ MicroEvent.mixin(LudosConnection)
 window.ludos = window.ludos or {}
 window.ludos.protocol =
   LudosConnection: LudosConnection
+  gameControl: gameControl
