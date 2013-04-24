@@ -17,9 +17,11 @@ class Command(object):
     id = None
 
 class StartConnectionCommand(Command):
-    ''' Sent by a player connecting to a game server for the first time.
+    ''' Sent by a player connecting to a game server for the first time, and by the server to the player to
+    acknowledge the connection and inform the player of game options and their assigned player ID.
     @arg version: Integer protocol version being used to connect.
     @arg game_id: String unique identifier of the game being connected to
+    @arg game_data: Object containing options for the game being created
     @arg player_id: Integer ID of the player number that is connecting
     @arg player_data: Object containing arbitrary data for the player that is connecting
     @arg signature: String signature from a master game server validating the previous arguments
@@ -28,6 +30,7 @@ class StartConnectionCommand(Command):
     CREATE_GAME = 0
     JOIN_GAME = 1
     JOIN_GAME_AS_PLAYER = 2
+    LIST_GAMES = 3
     def __init__(self, version, op, game_id, game_data, player_id, player_data, signature):
         self.version = self.op = self.game_id = self.game_data, self.player_id = self.player_data = self.signature = None
 
@@ -80,6 +83,14 @@ class ChatMessageCommand(Command):
         self.player_id = self.channels = self.message = None
 
 
+class GameListCommand(Command):
+    ''' Sent by the server to a client in game list mode, containing a list of all of the open games on the server.
+     @arg server_data: Object containing general information about the server status
+     @arg game_list: List of currently open games on the server
+    '''
+    id = 5
+    def __init__(self, server_data, game_list):
+        self.server_data = self.game_list = None
 
 
 

@@ -11,6 +11,9 @@ class LudosConnection(object):
 
     def on_command(self, command):
         if isinstance(command, StartConnectionCommand):
+            if command.op == StartConnectionCommand.LIST_GAMES:
+                MANAGER.bind_games_changed(self.send_games_changed)
+                return
             game_id = command.game_id
             player_id = command.player_id
             if command.op == StartConnectionCommand.CREATE_GAME:
@@ -20,7 +23,8 @@ class LudosConnection(object):
             game_data = self.game.data
             if command.op == StartConnectionCommand.JOIN_GAME:
                 player_id = self.game.assign_player_id()
-            if self.game.state > Game.STATE_NEW:
+            print self.game.state
+            if self.game.state > Game.STATE_OPEN:
                 self.transport.disconnect()
                 return
             for player in self.game.players.values():
@@ -39,7 +43,11 @@ class LudosConnection(object):
                 if player != self.player:
                     player.transport.send_command(command)
 
+    def send_games_changed(self, data, games):
+        self.transport.send_command(GameListCommand(data, games))
+
     def on_disconnect(self, clean):
+        MANAGER.unbind_games_changed(self.send_games_changed)
         if not hasattr(self, 'game'):
             return
         self.game.remove_player(self.player.id)

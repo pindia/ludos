@@ -1,3 +1,4 @@
+import logging
 from unittest import TestCase
 from ludos.connection import LudosConnection, MANAGER
 from ludos.transport import Transport
@@ -33,6 +34,7 @@ class TestTransport(Transport):
         super(TestTransport, self).__init__()
 
     def client_command(self, command):
+        logging.debug('%s ->' % (command,))
         self._on_command(command)
 
     def client_disconnected(self, clean):
@@ -51,6 +53,7 @@ class TestTransport(Transport):
 
 
     def send_command(self, command):
+        logging.debug('-> %s' % (command,))
         self.command_buffer.append(command)
 
     def disconnect(self):

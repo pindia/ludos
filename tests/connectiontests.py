@@ -49,3 +49,16 @@ class ConnectionTests(LudosTestCase):
         self.assertEquals(c.game_id, c1.game.id)
         self.assertEquals(c.game_data, {'players': 2})
         self.assertEquals(c.player_id, 1)
+
+    def test_game_listener(self):
+        c1 = self.make_connection()
+        c1.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.LIST_GAMES, None, None, None, None, None))
+        c = c1.transport.receive_command(GameListCommand)
+        self.assertEquals(c.game_list, [])
+        self.clear_all_buffers()
+
+        c2 = self.make_connection()
+        c2.transport.client_command(StartConnectionCommand(1, StartConnectionCommand.CREATE_GAME, 'test', {'players': 2}, None, {'name': 'Player 1'}, None))
+
+        c = c1.transport.receive_command(GameListCommand)
+        self.assertEquals(c.game_list, [{'id': 'test', 'players': 1, 'target_players': 2}])

@@ -1,5 +1,5 @@
 command =
-  START_CONNECTION: 0 # version, op, gameId, playerId, playerData, signature
+  START_CONNECTION: 0 # version, op, gameId, gameData, playerId, playerData, signature
   PLAYER_CONNECTED: 1 # playerId, playerData
   GAME_CONTROL: 2 # op, timestep, playerId
   PLAYER_ACTION: 3 # playerId, timestep, actions
@@ -9,6 +9,7 @@ startConnection =
   OP_CREATE_GAME: 0
   OP_JOIN_GAME: 1
   OP_JOIN_GAME_AS_PLAYER: 2
+  OP_LIST_GAMES: 3
 
 gameControl =
   START_GAME: 0
