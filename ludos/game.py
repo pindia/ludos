@@ -1,21 +1,23 @@
 import collections
+import functools
 import itertools
 import logging
+from ludos.event import EventSource
 from ludos.protocol import *
 
 log = logging.getLogger(__name__)
 
-class Game(object):
+class Game(EventSource):
     STATE_OPEN = 0
     STATE_RUNNING = 1
     STATE_PAUSED = 2
     STATE_OVER = 3
     STATE_DESTROYED = 4
 
-    def __init__(self, id, data, state_callback=lambda new_state: None):
+    def __init__(self, id, data):
+        super(Game, self).__init__()
         self.id = id
         self.data = data
-        self.state_callback = state_callback
         self._state = Game.STATE_OPEN
         self.players = {}
         self.game_control = collections.defaultdict(set)
@@ -25,7 +27,7 @@ class Game(object):
 
     def set_state(self, new_state):
         self._state = new_state
-        self.state_callback(new_state)
+        self.trigger('stateChanged', new_state)
 
     state = property(get_state, set_state)
 
@@ -34,10 +36,16 @@ class Game(object):
             if i not in self.players:
                 return i
 
+    def add_player(self, player_id, player):
+        self.players[player_id] = player
+        self.trigger('playersChanged')
+
     def remove_player(self, player_id):
         del self.players[player_id]
         if len(self.players) == 0:
             self.state = Game.STATE_DESTROYED
+        else:
+            self.trigger('playersChanged')
 
 
     def received_game_control(self, command, player):
@@ -69,27 +77,32 @@ class Player(object):
         self.data = data
         self.transport = transport
 
-class GameManager(object):
+class GameManager(EventSource):
     def __init__(self):
+        super(GameManager, self).__init__()
         self.games = {}
-        self.listeners = []
 
     def get_game(self, game_id, game_data):
         if game_id in self.games:
             return self.games[game_id]
         else:
-            game = Game(game_id, game_data, lambda new_state: self.update_game(game_id, new_state))
+            game = Game(game_id, game_data)
+            game.bind('stateChanged', functools.partial(self.game_state_changed, game))
+            game.bind('playersChanged', functools.partial(self.game_players_changed, game))
             self.games[game_id] = game
-            game.state = Game.STATE_OPEN
             return game
 
-    def update_game(self, game_id, new_state):
-        print game_id, new_state
+    def game_players_changed(self, game):
+        if game.state == Game.STATE_OPEN:
+            self.send_games_changed()
+
+    def game_state_changed(self, game, new_state):
+        print game.id, new_state
         if new_state == Game.STATE_OPEN:
             self.send_games_changed()
         if new_state == Game.STATE_DESTROYED:
-            log.info('Destroying game %s' % game_id)
-            del self.games[game_id]
+            log.info('Destroying game %s' % game.id)
+            del self.games[game.id]
             self.send_games_changed()
 
     def assign_game_id(self):
@@ -97,15 +110,10 @@ class GameManager(object):
             if str(i) not in self.games:
                 return str(i)
 
-    def bind_games_changed(self, listener):
-        self.listeners.append(listener)
-        self.send_games_changed(listener)
-
-    def unbind_games_changed(self, listener):
-        try:
-            self.listeners.remove(listener)
-        except ValueError:
-            pass
+    def bind(self, event, listener):
+        super(GameManager, self).bind(event, listener)
+        if event == 'gamesChanged':
+            self.send_games_changed(listener)
 
     def send_games_changed(self, listener=None):
         print self.games
@@ -114,9 +122,7 @@ class GameManager(object):
         if listener:
             listener(data, games)
         else:
-            for listener in self.listeners:
-                listener(data, games)
-
+            self.trigger('gamesChanged', data, games)
 
     def reset(self):
         self.games = {}
