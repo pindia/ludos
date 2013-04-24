@@ -13,13 +13,13 @@ class Timer
     clearTimeout this.timeout
 
   allowTicks: (ticks) ->
-    this.maxTicks += ticks
-    if this.ready
-      this._tick()
-      this.ready = false
+    this.setMaxTicks(this.maxTicks + ticks)
 
   setMaxTicks: (maxTicks) ->
     this.maxTicks = maxTicks
+    if this.ready
+      this.ready = false
+      this._tryTick()
 
   _setTimeout: ->
     this.timeout = setTimeout (=> this._tryTick()), this.interval
