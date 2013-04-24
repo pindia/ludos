@@ -49,7 +49,7 @@ class Engine
     this.timer.bind 'tick', =>
       this._step()
     for timestep in [0...this.scheduleDelay]
-      for player in [0...this.players]
+      for player of this.players
         this.receiveCommands(player, timestep, [])
     this.checkMaxTimestep()
 
@@ -66,7 +66,7 @@ class Engine
 
   checkMaxTimestep: ->
     if this.timestep not of this.timestepIndex then return
-    for player in [0...this.players]
+    for player of this.players
       if player not of this.timestepIndex[this.timestep]
         return
     this.timer.setMaxTicks(this.timestep + 1)
@@ -75,7 +75,7 @@ class Engine
     this.myCommands.push command
 
   _step: ->
-    for player in [0...this.players]
+    for player of this.players
       this.trigger('playerCommands', player, this.timestepIndex[this.timestep][player])
     this.trigger('advanceTimestep', this.timestep)
     delete this.timestepIndex[this.timestep]
