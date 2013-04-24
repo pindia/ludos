@@ -14,11 +14,11 @@ mainDialog = $$
               <option value="4">4</option>
               <option value="5">5</option>
             </select>
-            <button id="create-game" class="btn btn-primary">Create game</button>
+            <button type="button" id="create-game" class="btn btn-primary">Create game</button>
           </form>
           <form class="form-horizontal">
             <input type="text" placeholder="Game ID" id="game-id">
-            <button id="join-game" class="btn btn-primary">Join game</button>
+            <button type="button" id="join-game" class="btn btn-primary">Join game</button>
           </form>
         </div>
       </div>
@@ -51,7 +51,7 @@ waitingDialog = $$
             Game ID: <strong data-bind="gameId"/>
           </p>
           <div class="center">
-            <button class="btn btn-danger" id="quit-button">Quit</button>
+            <button type="button" class="btn btn-danger" id="quit-button">Quit</button>
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@ class GameKitController
           this.game.quit()
           this.initializeGame()
     this.game.bind 'playersChanged', =>
-     dialog.m.players = this.game.numPlayers()
+      dialog.m.players = this.game.numPlayers()
     this.game.bind 'gameStarted', ->
       dialog.destroy()
     $$.document.append dialog
