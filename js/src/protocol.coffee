@@ -4,6 +4,7 @@ command =
   GAME_CONTROL: 2 # op, timestep, playerId
   PLAYER_ACTION: 3 # playerId, timestep, actions
   CHAT_MESSAGE: 4 # playerId, channel, message
+  GAME_LIST: 5 # serverData, gameList
 
 startConnection =
   OP_CREATE_GAME: 0
@@ -46,6 +47,8 @@ class LudosConnection
       this.trigger('playerAction', args[0], args[1], args[2])
     if commandId == command.GAME_CONTROL
       this.trigger('gameControl', args[0], args[1], args[2])
+    if commandId == command.GAME_LIST
+      this.trigger('gameList', args[0], args[1])
 
   sendGameControl: (op, timestep, playerId=null) ->
     this._sendCommand(command.GAME_CONTROL, [op, timestep, playerId])
@@ -63,6 +66,12 @@ class LudosConnection
     this.bind 'socketOpen', =>
       this._sendCommand(command.START_CONNECTION,
         [PROTOCOL_VERSION, startConnection.OP_JOIN_GAME, gameId, null, null, playerData, null])
+    this._connect()
+
+  listGames: ->
+    this.bind 'socketOpen', =>
+      this._sendCommand(command.START_CONNECTION,
+        [PROTOCOL_VERSION, startConnection.OP_LIST_GAMES, null, null, null, null, null])
     this._connect()
 
   close: ->

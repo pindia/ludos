@@ -24,3 +24,7 @@
 .center {
     text-align: center;
 }
+
+.game-list-empty td {
+    text-align: center;
+}
