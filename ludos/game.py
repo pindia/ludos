@@ -97,7 +97,6 @@ class GameManager(EventSource):
             self.send_games_changed()
 
     def game_state_changed(self, game, new_state):
-        print game.id, new_state
         if new_state == Game.STATE_OPEN:
             self.send_games_changed()
         if new_state == Game.STATE_DESTROYED:
@@ -116,7 +115,6 @@ class GameManager(EventSource):
             self.send_games_changed(listener)
 
     def send_games_changed(self, listener=None):
-        print self.games
         games = [{'id': game.id, 'players': len(game.players), 'target_players': game.data.get('players')} for game in self.games.values() if game.state == Game.STATE_OPEN]
         data = {'games': len(self.games), 'open_games': len(games), 'players': sum(len(g.players) for g in self.games.values())}
         if listener:

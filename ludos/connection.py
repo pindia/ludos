@@ -23,7 +23,6 @@ class LudosConnection(object):
             game_data = self.game.data
             if command.op == StartConnectionCommand.JOIN_GAME:
                 player_id = self.game.assign_player_id()
-            print self.game.state
             if self.game.state > Game.STATE_OPEN:
                 self.transport.disconnect()
                 return

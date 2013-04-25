@@ -60,6 +60,9 @@ mainDialog = $$
         if not gameList.length
           console.log 'aaa'
           this.append $$({view: format: '<tr class="game-list-empty"><td colspan="3">No open games</td></tr>'}), '.game-list tbody'
+      this.connection.bind 'disconnected', =>
+        setTimeout 5000, =>
+          this.connection.listGames()
     destroy: ->
       this.connection.close()
     'child:joinGame': (evt, id) ->

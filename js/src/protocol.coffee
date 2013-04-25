@@ -34,6 +34,7 @@ class LudosConnection
       #this.trigger('commandReceived', data[0], data.slice(1))
     this.ws.onclose = =>
       this.trigger('socketClosed')
+      this.trigger('disconnected')
 
   _sendCommand: (commandId, args) ->
     this.ws.send(JSON.stringify([commandId].concat(args)))

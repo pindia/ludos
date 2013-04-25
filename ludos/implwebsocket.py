@@ -17,7 +17,6 @@ def command_to_json(command):
 
 def command_from_json(data):
     l = json.loads(data)
-    print l
     cls = commands[l[0]]
     return cls(*l[1:])
 
