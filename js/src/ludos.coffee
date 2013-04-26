@@ -46,7 +46,7 @@ class Game
   gameStarted: ->
     this.engine = new ludos.Engine(
       this.playerId, this.players,
-      this.options.stepTime, this.options.networkStepTime, Math.max(1, this.options.minimumLatency / this.options.stepTime)
+      this.options.stepTime, this.options.networkStepTime, this.options.minimumLatency
     )
     this.engine.bind 'advanceTimestep', => this.trigger('advanceTimestep')
     this.engine.bind 'playerCommands', (playerId, actions) => this.trigger('playerActions', playerId, actions)

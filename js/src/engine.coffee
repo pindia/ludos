@@ -40,17 +40,17 @@ class Engine
   constructor: (playerId, players, stepTime, networkStepTime, scheduleDelay) ->
     this.players = players
     this.playerId = playerId
-    this.scheduleDelay = Math.max(1, scheduleDelay)
+    this.networkStepTime = networkStepTime
+    this.scheduleDelay = scheduleDelay
     this.timestep = 0
     this.maxTimestep = 0
     this.networkStepModulo = parseInt(networkStepTime / stepTime)
-    console.log this.networkStepModulo
     this.timestepIndex = {}
     this.myCommands = []
     this.timer = new Timer(stepTime)
     this.timer.bind 'tick', =>
       this._step()
-    for timestep in [0...this.scheduleDelay]
+    for timestep in [0...Math.ceil(this.scheduleDelay/this.networkStepTime)]
       for player of this.players
         this.receiveCommands(player, timestep, [])
     this.checkMaxTimestep()
@@ -89,8 +89,9 @@ class Engine
     this.checkMaxTimestep()
 
   _sendCommands: ->
-    this.trigger('sendCommands', this.playerId, this.timestep + this.scheduleDelay, this.myCommands)
-    this.receiveCommands(this.playerId, this.timestep + this.scheduleDelay, this.myCommands)
+    timestep = this.timestep + Math.ceil(this.scheduleDelay/this.networkStepTime)
+    this.trigger('sendCommands', this.playerId, timestep, this.myCommands)
+    this.receiveCommands(this.playerId, timestep, this.myCommands)
     this.myCommands = []
 MicroEvent.mixin(Engine)
 
