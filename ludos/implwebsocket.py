@@ -27,7 +27,10 @@ class WebSocketTransport(Transport):
 
     def send_command(self, command):
         logging.debug('%s -> %d' % (command, self.handler.id))
-        self.handler.write_message(command_to_json(command))
+        try:
+            self.handler.write_message(command_to_json(command))
+        except AttributeError:
+            pass
 
     def disconnect(self):
         self.handler.close()

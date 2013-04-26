@@ -35,6 +35,9 @@ class Game
         delete this.players[playerId]
         this.trigger('playersChanged')
 
+    this.connection.bind 'disconnected', =>
+      this.trigger 'disconnected'
+
   _checkStartGame: ->
     if this.options.players == this.numPlayers()
       this.connection.sendGameControl(gameControl.START_GAME, this.timestep)

@@ -108,6 +108,23 @@ waitingDialog = $$
       this.view.$('.bar').css
         width: "#{100*this.m.players/this.m.targetPlayers}%"
 
+gameOverDialog = $$
+  view:
+    format: '''
+      <div class="ui-dialog">
+        <div class="ui-dialog-titlebar" data-bind="title"></div>
+        <div class="ui-dialog-content">
+          <div class="center">
+            <button type="button" class="btn btn-danger" id="quit-button">Quit</button>
+          </div>
+        </div>
+      </div>
+    '''
+  controller:
+    'click #quit-button': ->
+      this.destroy()
+      this.trigger('quit')
+
 class GameKitController
   constructor: (options) ->
     this.options = options
@@ -127,6 +144,12 @@ class GameKitController
       this.showWaitingDialog()
     this.game.bind 'gameStarted', =>
       this.trigger('gameStarted', this.game)
+    this.game.bind 'disconnected', =>
+      $$.document.append $$ gameOverDialog,
+        model:
+          title: 'Disconnected from server'
+        controller:
+          quit: => this.initializeGame()
 
   showWaitingDialog: ->
     dialog = $$ waitingDialog,
@@ -141,6 +164,8 @@ class GameKitController
     this.game.bind 'playersChanged', =>
       dialog.m.players = this.game.numPlayers()
     this.game.bind 'gameStarted', ->
+      dialog.destroy()
+    this.game.bind 'disconnected', ->
       dialog.destroy()
     $$.document.append dialog
 
