@@ -37,12 +37,14 @@ class Timer
 MicroEvent.mixin(Timer)
 
 class Engine
-  constructor: (playerId, players, stepTime, scheduleDelay) ->
+  constructor: (playerId, players, stepTime, networkStepTime, scheduleDelay) ->
     this.players = players
     this.playerId = playerId
     this.scheduleDelay = Math.max(1, scheduleDelay)
     this.timestep = 0
     this.maxTimestep = 0
+    this.networkStepModulo = parseInt(networkStepTime / stepTime)
+    console.log this.networkStepModulo
     this.timestepIndex = {}
     this.myCommands = []
     this.timer = new Timer(stepTime)
@@ -65,21 +67,24 @@ class Engine
     this.checkMaxTimestep()
 
   checkMaxTimestep: ->
-    if this.timestep not of this.timestepIndex then return
-    for player of this.players
-      if player not of this.timestepIndex[this.timestep]
-        return
+    if this.timestep % this.networkStepModulo == 0
+      if this.timestep not of this.timestepIndex then return
+      for player of this.players
+        if player not of this.timestepIndex[this.timestep]
+          return
     this.timer.setMaxTicks(this.timestep + 1)
 
   sendCommand: (command) ->
     this.myCommands.push command
 
   _step: ->
-    for player of this.players
-      this.trigger('playerCommands', player, this.timestepIndex[this.timestep][player])
+    if this.timestep % this.networkStepModulo == 0
+      for player of this.players
+        this.trigger('playerCommands', player, this.timestepIndex[this.timestep][player])
     this.trigger('advanceTimestep', this.timestep)
     delete this.timestepIndex[this.timestep]
-    this._sendCommands()
+    if this.timestep % this.networkStepModulo == 0
+      this._sendCommands()
     this.timestep += 1
     this.checkMaxTimestep()
 
