@@ -77,12 +77,8 @@ $ ->
     console.log engine.options
     game = new TestGame(engine.options.players)
 
-    updateTimer = new ludos.Timer(25)
-    updateTimer.start()
-    updateTimer.bind 'tick', ->
-      game.update()
     engine.bind 'advanceTimestep', ->
-      updateTimer.allowTicks(2)
+      game.update()
 
     keyboard = new ludos.KeyboardEventHelper(engine, $(document), [37, 38, 39])
     keyboard.bind 'keyDown', (playerId, which) ->
