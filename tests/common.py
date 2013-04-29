@@ -1,8 +1,6 @@
 import logging
 from unittest import TestCase
 from ludos.connection import LudosConnection, MANAGER
-from ludos.transport import Transport
-
 
 class LudosTestCase(TestCase):
     def setUp(self):
@@ -10,35 +8,33 @@ class LudosTestCase(TestCase):
         MANAGER.reset()
 
     def make_connection(self):
-        t = TestTransport()
-        c = LudosConnection(t)
+        c = TestConnection()
         self.connections.append(c)
         return c
 
     def clear_all_buffers(self):
         for connection in self.connections:
-            connection.transport.command_buffer = []
+            connection.command_buffer = []
 
     def assertNoCommandsReceived(self, connection):
-        self.assertFalse(connection.transport.command_buffer)
+        self.assertFalse(connection.command_buffer)
 
     def assertCommandReceived(self, connection, command):
-        self.assertTrue(connection.transport.open)
-        self.assertIn(command, connection.transport.command_buffer)
-        connection.transport.command_buffer.remove(command)
+        self.assertTrue(connection.open)
+        self.assertIn(command, connection.command_buffer)
+        connection.command_buffer.remove(command)
 
-class TestTransport(Transport):
+class TestConnection(LudosConnection):
     def __init__(self):
         self.open = True
         self.command_buffer = []
-        super(TestTransport, self).__init__()
+        super(TestConnection, self).__init__()
 
     def client_command(self, command):
-        logging.debug('%s ->' % (command,))
-        self._on_command(command)
+        self.on_command(command)
 
     def client_disconnected(self, clean):
-        self._on_disconnect(clean)
+        self.on_disconnect(clean)
 
     def receive_command(self, cls=None):
         assert len(self.command_buffer)
@@ -53,7 +49,6 @@ class TestTransport(Transport):
 
 
     def send_command(self, command):
-        logging.debug('-> %s' % (command,))
         self.command_buffer.append(command)
 
     def disconnect(self):
