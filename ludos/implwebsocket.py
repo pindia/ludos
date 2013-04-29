@@ -9,7 +9,6 @@ from tornado import websocket
 from tornado.httpserver import HTTPServer
 import tornado.web
 from ludos.connection import LudosConnection
-from ludos.transport import Transport
 from ludos.protocol import commands
 
 def command_to_json(command):
@@ -20,21 +19,6 @@ def command_from_json(data):
     cls = commands[l[0]]
     return cls(*l[1:])
 
-class WebSocketTransport(Transport):
-    def __init__(self, handler):
-        super(WebSocketTransport, self).__init__()
-        self.handler = handler
-
-    def send_command(self, command):
-        logging.debug('%s -> %d' % (command, self.handler.id))
-        try:
-            self.handler.write_message(command_to_json(command))
-        except AttributeError:
-            pass
-
-    def disconnect(self):
-        self.handler.close()
-
 CONNECTION_ID = 1
 
 class LudosWebSocketHandler(websocket.WebSocketHandler):
@@ -43,17 +27,28 @@ class LudosWebSocketHandler(websocket.WebSocketHandler):
         self.id = CONNECTION_ID
         CONNECTION_ID += 1
         logging.info('Connection made. Assigned connection ID %d.' % self.id)
-        self.transport = WebSocketTransport(self)
-        self.session = LudosConnection(self.transport)
+        self.connection = LudosConnection()
+        self.connection.bind('sendCommand', self.send_command)
+        self.connection.bind('disconnect', self.disconnect)
+
+    def send_command(self, command):
+        logging.debug('%s -> %d' % (command, self.id))
+        try:
+            self.write_message(command_to_json(command))
+        except AttributeError:
+            pass
+
+    def disconnect(self):
+        self.close()
 
     def on_message(self, message):
         command = command_from_json(message)
         logging.debug('%d -> %s' % (self.id, command))
-        self.transport._on_command(command)
+        self.connection.on_command(command)
 
     def on_close(self):
         logging.info('Connection %d closed.' % self.id)
-        self.transport._on_disconnect(True)
+        self.connection.on_disconnect(True)
 
 application = tornado.web.Application([
     (r"/ws/json", LudosWebSocketHandler),

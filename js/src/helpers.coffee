@@ -28,7 +28,7 @@ MicroEvent.mixin(KeyboardEventHelper)
 do ($=jQuery) ->
   $.fn.ludosEventSync = (options) ->
     helper = new KeyboardEventHelper(options.game, this, options.keys)
-    if options.keyDown
+    if options.keydown
       helper.bind('keydown', options.keydown)
-    if options.keyUp
+    if options.keyup
       helper.bind('keyup', options.keyup)

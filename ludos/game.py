@@ -53,7 +53,7 @@ class Game(EventSource):
         s.add(player)
         if len(s) == len(self.players): # All players have agreed on command
             for player in self.players.values():
-                player.transport.send_command(command) # Make the command official
+                player.connection.send_command(command) # Make the command official
             self.process_game_control(command)
 
     def process_game_control(self, command):
@@ -66,16 +66,16 @@ class Game(EventSource):
         if command.op == GameControlCommand.END_GAME and self.state > Game.STATE_OPEN:
             self.state = Game.STATE_OVER
         if command.op == GameControlCommand.PLAYER_KICKED:
-            self.players[command.player].transport.disconnect()
+            self.players[command.player].connection.disconnect()
 
 
 
 
 class Player(object):
-    def __init__(self, id, data, transport):
+    def __init__(self, id, data, connection):
         self.id = id
         self.data = data
-        self.transport = transport
+        self.connection = connection
 
 class GameManager(EventSource):
     def __init__(self):
