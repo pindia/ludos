@@ -40,8 +40,9 @@ class Engine
   constructor: (playerId, players, stepTime, networkStepTime, scheduleDelay) ->
     this.players = players
     this.playerId = playerId
+    this.stepTime = stepTime
     this.networkStepTime = networkStepTime
-    this.scheduleDelay = scheduleDelay
+    this.scheduleDelay = Math.max(networkStepTime, scheduleDelay)
     this.timestep = 0
     this.maxTimestep = 0
     this.networkStepModulo = parseInt(networkStepTime / stepTime)
@@ -50,7 +51,7 @@ class Engine
     this.timer = new Timer(stepTime)
     this.timer.bind 'tick', =>
       this._step()
-    for timestep in [0...Math.ceil(this.scheduleDelay/this.networkStepTime)]
+    for timestep in [0...Math.ceil(this.scheduleDelay/this.stepTime)]
       for player of this.players
         this.receiveCommands(player, timestep, [])
     this.checkMaxTimestep()
@@ -89,7 +90,7 @@ class Engine
     this.checkMaxTimestep()
 
   _sendCommands: ->
-    timestep = this.timestep + Math.ceil(this.scheduleDelay/this.networkStepTime)
+    timestep = this.timestep + Math.ceil(this.scheduleDelay/this.stepTime)
     this.trigger('sendCommands', this.playerId, timestep, this.myCommands)
     this.receiveCommands(this.playerId, timestep, this.myCommands)
     this.myCommands = []
