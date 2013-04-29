@@ -81,21 +81,23 @@ $ ->
     engine.bind 'advanceTimestep', ->
       game.update()
 
-    keyboard = new ludos.KeyboardEventHelper(engine, $(document), [37, 38, 39])
-    keyboard.bind 'keyDown', (playerId, which) ->
-      player = game.players[playerId]
-      if which == 39
-        player.dx = 3
-      if which == 37
-        player.dx = -3
-      if which == 38 and player.y == 0
-        player.dy = 10
-    keyboard.bind 'keyUp', (playerId, which) ->
-      player = game.players[playerId]
-      if which == 39 and player.dx > 0
-        player.dx = 0
-      if which == 37 and player.dx < 0
-        player.dx = 0
+    $(document).ludosEventSync
+      game: engine
+      keys: [37, 38, 39]
+      keydown: (playerId, which) ->
+        player = game.players[playerId]
+        if which == 39
+          player.dx = 3
+        if which == 37
+          player.dx = -3
+        if which == 38 and player.y == 0
+          player.dy = 10
+      keyup: (playerId, which) ->
+        player = game.players[playerId]
+        if which == 39 and player.dx > 0
+          player.dx = 0
+        if which == 37 and player.dx < 0
+          player.dx = 0
 
 
 #game = new ludos.Game
