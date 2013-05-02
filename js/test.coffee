@@ -73,7 +73,7 @@ $ ->
     server: window.location.hostname + ':8000'
     stepTime: 25
     networkStepTime: 50
-    minimumLatency: 100
+    minimumLatency: 0
 
   c.bind 'gameStarted', (engine) ->
     game = new TestGame(engine.options.players)

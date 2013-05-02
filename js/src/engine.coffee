@@ -36,13 +36,15 @@ class Timer
     this._setTimeout()
 MicroEvent.mixin(Timer)
 
+sent = []
+
 class Engine
   constructor: (playerId, players, stepTime, networkStepTime, scheduleDelay) ->
     this.players = players
     this.playerId = playerId
     this.stepTime = stepTime
     this.networkStepTime = networkStepTime
-    this.scheduleDelay = Math.max(networkStepTime, scheduleDelay)
+    this.scheduleDelay = Math.max(0, scheduleDelay)
     this.timestep = 0
     this.maxTimestep = 0
     this.networkStepModulo = parseInt(networkStepTime / stepTime)
@@ -51,9 +53,10 @@ class Engine
     this.timer = new Timer(stepTime)
     this.timer.bind 'tick', =>
       this._step()
-    for timestep in [0...Math.ceil(this.scheduleDelay/this.stepTime)]
-      for player of this.players
-        this.receiveCommands(player, timestep, [])
+    for timestep in [0...(1+Math.ceil(this.scheduleDelay/this.networkStepTime))*this.networkStepModulo]
+      if timestep % this.networkStepModulo == 0
+        for player of this.players
+          this.receiveCommands(player, timestep, [])
     this.checkMaxTimestep()
 
   start: ->
@@ -76,11 +79,14 @@ class Engine
     this.timer.setMaxTicks(this.timestep + 1)
 
   sendCommand: (command) ->
+    sent.push new Date()
     this.myCommands.push command
 
   _step: ->
     if this.timestep % this.networkStepModulo == 0
       for player of this.players
+        for command in this.timestepIndex[this.timestep][player]
+          console.log (new Date() - sent.shift())
         this.trigger('playerCommands', player, this.timestepIndex[this.timestep][player])
     this.trigger('advanceTimestep', this.timestep)
     delete this.timestepIndex[this.timestep]
@@ -90,7 +96,7 @@ class Engine
     this.checkMaxTimestep()
 
   _sendCommands: ->
-    timestep = this.timestep + Math.ceil(this.scheduleDelay/this.stepTime)
+    timestep = this.timestep + (1 + Math.ceil(this.scheduleDelay/this.networkStepTime)) * this.networkStepModulo
     this.trigger('sendCommands', this.playerId, timestep, this.myCommands)
     this.receiveCommands(this.playerId, timestep, this.myCommands)
     this.myCommands = []
