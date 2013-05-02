@@ -91,12 +91,14 @@ class Engine
     this.trigger('advanceTimestep', this.timestep)
     delete this.timestepIndex[this.timestep]
     if this.timestep % this.networkStepModulo == 0
-      this._sendCommands()
+      timestep = this.timestep
+      setTimeout (this.networkStepTime - (this.scheduleDelay % this.networkStepTime)), =>
+        this._sendCommands(timestep)
     this.timestep += 1
     this.checkMaxTimestep()
 
-  _sendCommands: ->
-    timestep = this.timestep + (1 + Math.ceil(this.scheduleDelay/this.networkStepTime)) * this.networkStepModulo
+  _sendCommands: (timestep) ->
+    timestep = timestep + (1 + Math.floor(this.scheduleDelay/this.networkStepTime)) * this.networkStepModulo
     this.trigger('sendCommands', this.playerId, timestep, this.myCommands)
     this.receiveCommands(this.playerId, timestep, this.myCommands)
     this.myCommands = []
