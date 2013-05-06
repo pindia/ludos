@@ -98,6 +98,16 @@ class PingCommand(Command):
     def __init__(self):
         pass
 
+class PlayerStatusCommand(Command):
+    ''' Sent by the server to inform clients about the status of other players.
+     @arg player_id: Integer of the player ID the command is referencing
+     @arg data: Object containing information about the player referenced
+     '''
+    id = 7
+    def __init__(self, player_id, data):
+        self.player_id = self.data = None
+
+
 
 commands = {}
 

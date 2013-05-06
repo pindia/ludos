@@ -36,7 +36,7 @@ class LudosWebSocketHandler(websocket.WebSocketHandler):
 
     def periodic(self):
         self.connection.periodic()
-        self.timeout = IOLoop.instance().add_timeout(timedelta(seconds=10), self.periodic)
+        self.timeout = IOLoop.instance().add_timeout(timedelta(seconds=2), self.periodic)
 
     def send_command(self, command):
         logging.debug('%s -> %d' % (command, self.id))

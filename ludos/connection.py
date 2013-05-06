@@ -45,10 +45,12 @@ class LudosConnection(EventSource):
                     player.connection.send_command(command)
         if isinstance(command, PingCommand):
             latency = int((time.time() - self.pings.pop(0))*1000)
-            print '%d ms' % latency
+            self.player.latency = latency
 
     def periodic(self):
         if hasattr(self, 'game'):
+            for player in self.game.players.values():
+                self.send_command(PlayerStatusCommand(player.id, {'latency': player.latency}))
             self.pings.append(time.time())
             self.send_command(PingCommand())
 
