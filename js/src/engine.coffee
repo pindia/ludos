@@ -84,9 +84,9 @@ class Engine
 
   _step: ->
     if this.timestep % this.networkStepModulo == 0
+      for command in this.timestepIndex[this.timestep][this.playerId]
+        console.log (new Date() - sent.shift())
       for player of this.players
-        for command in this.timestepIndex[this.timestep][player]
-          console.log (new Date() - sent.shift())
         this.trigger('playerCommands', player, this.timestepIndex[this.timestep][player])
     this.trigger('advanceTimestep', this.timestep)
     delete this.timestepIndex[this.timestep]
