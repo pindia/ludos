@@ -1,3 +1,4 @@
+import time
 from .game import GameManager, Player, Game
 from ludos.event import EventSource
 from ludos.protocol import *
@@ -5,6 +6,10 @@ from ludos.protocol import *
 MANAGER = GameManager()
 
 class LudosConnection(EventSource):
+    def __init__(self):
+        self.pings = []
+        super(LudosConnection, self).__init__()
+
 
     def on_command(self, command):
         if isinstance(command, StartConnectionCommand):
@@ -38,6 +43,14 @@ class LudosConnection(EventSource):
             for player in self.game.players.values():
                 if player != self.player:
                     player.connection.send_command(command)
+        if isinstance(command, PingCommand):
+            latency = int((time.time() - self.pings.pop(0))*1000)
+            print '%d ms' % latency
+
+    def periodic(self):
+        if hasattr(self, 'game'):
+            self.pings.append(time.time())
+            self.send_command(PingCommand())
 
     def send_games_changed(self, data, games):
         self.send_command(GameListCommand(data, games))

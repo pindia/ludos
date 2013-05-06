@@ -92,6 +92,11 @@ class GameListCommand(Command):
     def __init__(self, server_data, game_list):
         self.server_data = self.game_list = None
 
+class PingCommand(Command):
+    ''' Sent between the client and server to determine the network latency between them. No arguments.'''
+    id = 6
+    def __init__(self):
+        pass
 
 
 commands = {}

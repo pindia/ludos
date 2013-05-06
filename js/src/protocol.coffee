@@ -5,6 +5,7 @@ command =
   PLAYER_ACTION: 3 # playerId, timestep, actions
   CHAT_MESSAGE: 4 # playerId, channel, message
   GAME_LIST: 5 # serverData, gameList
+  PING: 6 # No arguments
 
 startConnection =
   OP_CREATE_GAME: 0
@@ -50,6 +51,9 @@ class LudosConnection
       this.trigger('gameControl', args[0], args[1], args[2])
     if commandId == command.GAME_LIST
       this.trigger('gameList', args[0], args[1])
+    if commandId == command.PING
+      this._sendCommand(command.PING, [])
+
 
   sendGameControl: (op, timestep, playerId=null) ->
     this._sendCommand(command.GAME_CONTROL, [op, timestep, playerId])

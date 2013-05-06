@@ -1,4 +1,5 @@
 ''' Implementation of the TutorMe protocol using Tornado WebSockets '''
+from datetime import timedelta
 
 from functools import partial
 import json
@@ -6,6 +7,7 @@ import logging
 
 import tornado, re
 from tornado import websocket
+from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
 import tornado.web
 from ludos.connection import LudosConnection
@@ -30,6 +32,11 @@ class LudosWebSocketHandler(websocket.WebSocketHandler):
         self.connection = LudosConnection()
         self.connection.bind('sendCommand', self.send_command)
         self.connection.bind('disconnect', self.disconnect)
+        self.periodic()
+
+    def periodic(self):
+        self.connection.periodic()
+        self.timeout = IOLoop.instance().add_timeout(timedelta(seconds=10), self.periodic)
 
     def send_command(self, command):
         logging.debug('%s -> %d' % (command, self.id))
@@ -48,6 +55,7 @@ class LudosWebSocketHandler(websocket.WebSocketHandler):
 
     def on_close(self):
         logging.info('Connection %d closed.' % self.id)
+        IOLoop.instance().remove_timeout(self.timeout)
         self.connection.on_disconnect(True)
 
 application = tornado.web.Application([

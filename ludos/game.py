@@ -76,6 +76,7 @@ class Player(object):
         self.id = id
         self.data = data
         self.connection = connection
+        self.latency = None
 
 class GameManager(EventSource):
     def __init__(self):
