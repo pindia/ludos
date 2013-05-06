@@ -21,12 +21,17 @@ class Game
       $.extend(this.options, gameData)
       this.playerId = playerId
       this.players[playerId] = this.options.playerData
+      this.trigger('playerJoined', playerId, this.options.playerData)
       this.trigger('connected')
       this._checkStartGame()
     this.connection.bind 'playerConnected', (playerId, playerData) =>
       this.players[playerId] = playerData
+      this.trigger('playerJoined', playerId, playerData)
       this.trigger('playersChanged')
       this._checkStartGame()
+    this.connection.bind 'playerStatus', (playerId, data) =>
+      $.extend(this.players[playerId], data)
+      this.trigger('playerUpdated', playerId, this.players[playerId])
 
     this.connection.bind 'gameControl', (op, timestep, playerId) =>
       if op == gameControl.START_GAME

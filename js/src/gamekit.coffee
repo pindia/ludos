@@ -8,7 +8,7 @@ gameItem = $$
   controller:
     'click a': (evt) ->
       evt.preventDefault()
-      this.trigger('joinGame', [this.m.id])
+      this.trigger('joinGame', [this.model.get('id')])
 
 mainDialog = $$
   view:
@@ -106,7 +106,7 @@ waitingDialog = $$
       this.trigger('quit')
     'show, change:players': ->
       this.view.$('.bar').css
-        width: "#{100*this.m.players/this.m.targetPlayers}%"
+        width: "#{100*this.model.get('players')/this.model.get('targetPlayers')}%"
 
 gameOverDialog = $$
   view:
@@ -125,6 +125,48 @@ gameOverDialog = $$
       this.destroy()
       this.trigger('quit')
 
+playerItem = $$
+  view:
+    format: '''
+      <tr>
+        <td class="name" data-bind="name">
+        <td class="latency"></td>
+      </tr>
+    '''
+  controller:
+    'show, change:latency': ->
+      ms = this.model.get('latency')
+      if ms?
+        this.view.$('.latency').text("#{ms} ms")
+      else
+        this.view.$('.latency').text('-')
+      this.view.$('.latency').toggleClass('low', ms < 100).toggleClass('medium', ms >= 100 and ms < 200).toggleClass('high', ms >= 200)
+
+playersPanel = $$
+  view:
+    format: '''
+      <div id="ludos-player-panel">
+        <table class="table">
+          <thead>
+            <tr><th>Name</th><th>Latency</th></tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+    '''
+  controller:
+    create: ->
+      this.playerIndex = {}
+  addPlayer: (id, data) ->
+    data.name = data.name or id.toString()
+    e = $$(playerItem, data)
+    this.append e, 'tbody'
+    this.playerIndex[id] = e
+  updatePlayer: (id, data) ->
+    this.playerIndex[id].model.set data
+
 class GameKitController
   constructor: (options) ->
     this.options = options
@@ -133,6 +175,8 @@ class GameKitController
 
   initializeGame: ->
     this.game = new ludos.Game(this.options)
+    this.playersPanel = $$ playersPanel
+    $$.document.append this.playersPanel
     $$.document.append $$ mainDialog,
       controller:
         'createGame': (evt, options) =>
@@ -142,9 +186,14 @@ class GameKitController
           this.game.joinGame(gameId)
     this.game.bind 'connected', =>
       this.showWaitingDialog()
+    this.game.bind 'playerJoined', (playerId, playerData) =>
+      this.playersPanel.addPlayer(playerId, playerData)
+    this.game.bind 'playerUpdated', (playerId, data) =>
+      this.playersPanel.updatePlayer(playerId, data)
     this.game.bind 'gameStarted', =>
       this.trigger('gameStarted', this.game)
     this.game.bind 'disconnected', =>
+      this.playersPanel.destroy()
       $$.document.append $$ gameOverDialog,
         model:
           title: 'Disconnected from server'
@@ -168,6 +217,9 @@ class GameKitController
     this.game.bind 'disconnected', ->
       dialog.destroy()
     $$.document.append dialog
+
+
+
 
 MicroEvent.mixin(GameKitController)
 
